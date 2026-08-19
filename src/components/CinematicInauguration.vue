@@ -27,9 +27,6 @@
           isTearing ? 'animate-glitch-tear' : ''
         ]"
       >
-        <!-- Scanning Ring for Step 1 -->
-        <div v-if="currentStep === 1" class="absolute -inset-8 rounded-full border border-red-500/80 border-dashed animate-[spin_4s_linear_infinite] shadow-[0_0_25px_rgba(255,0,50,0.6)]" />
-
         <QRCodeRenderer 
           :value="qrUrl" 
           label="AUTHORIZATION GRANTED" 
