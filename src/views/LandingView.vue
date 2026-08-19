@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Shield, Lock, Terminal, ExternalLink } from 'lucide-vue-next';
+import { Lock, Terminal, ExternalLink } from 'lucide-vue-next';
 import LetterGlitch from '../components/LetterGlitch.vue';
 import QRCodeRenderer from '../components/QRCodeRenderer.vue';
 import { cyberAudio } from '../utils/cyberAudio';
