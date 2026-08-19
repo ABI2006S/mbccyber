@@ -18,7 +18,7 @@
         class="absolute inset-0 w-full h-full pointer-events-none z-30"
       />
 
-      <!-- STEP 1 & STEP 2: QR FREEZE & DIGITAL TEAR -->
+      <!-- STEP 1 & STEP 2: QR FREEZE & DIGITAL TEAR (TRANSITION QR.png -> tornqr.png) -->
       <div 
         v-if="currentStep <= 2" 
         :class="[
@@ -27,17 +27,24 @@
           isTearing ? 'animate-glitch-tear' : ''
         ]"
       >
+        <!-- Laser Rip Seam Line overlay during tear transition -->
+        <div 
+          v-if="isTearing" 
+          class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 bg-gradient-to-b from-transparent via-red-500 to-transparent z-40 animate-pulse shadow-[0_0_25px_#ff0033]" 
+        />
+
         <QRCodeRenderer 
+          :image-src="currentQrImage"
           :value="qrUrl" 
-          label="AUTHORIZATION GRANTED" 
+          :label="currentStep === 1 ? 'AUTHORIZATION GRANTED' : 'CIPHER OVERRIDE // TEARING QR CODE'" 
           :is-scanning="currentStep === 1"
         />
 
         <!-- Glitch Slices Overlay for Tear -->
-        <div v-if="isTearing" class="absolute inset-0 pointer-events-none overflow-hidden">
-          <div class="w-full h-1/4 bg-red-600/30 translate-x-3 transition-transform" />
-          <div class="w-full h-1/4 bg-red-800/40 -translate-x-4 transition-transform" />
-          <div class="w-full h-1/4 bg-red-500/20 translate-x-2 transition-transform" />
+        <div v-if="isTearing" class="absolute inset-0 pointer-events-none overflow-hidden z-30">
+          <div class="w-full h-1/4 bg-red-600/30 translate-x-4 transition-transform animate-pulse" />
+          <div class="w-full h-1/4 bg-red-800/40 -translate-x-5 transition-transform" />
+          <div class="w-full h-1/4 bg-red-500/20 translate-x-3 transition-transform animate-pulse" />
         </div>
       </div>
 
@@ -143,12 +150,15 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import QRCodeRenderer from './QRCodeRenderer.vue';
 import { cyberAudio } from '../utils/cyberAudio';
+import qrPng from '../assets/QR.png';
+import tornQrPng from '../assets/tornqr.png';
 
 const props = defineProps<{
   qrUrl: string;
 }>();
 
 const currentStep = ref(1); // 1: QR Freeze, 2: Tear, 3: Padlock, 4: Unlock, 5: Shield, 6: Logo, 7: Inaugurated
+const currentQrImage = ref(qrPng);
 const isTearing = ref(false);
 const isUnlocked = ref(false);
 const particleCanvasRef = ref<HTMLCanvasElement | null>(null);
@@ -176,20 +186,24 @@ const createDisintegrationParticles = () => {
   canvas.height = canvas.parentElement?.offsetHeight || 500;
 
   particles = [];
-  const particleCount = 120;
+  const particleCount = 180;
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
 
   for (let i = 0; i < particleCount; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 6;
+    // Spawning particles concentrated along the central torn seam
+    const seamY = centerY + (Math.random() - 0.5) * 280;
+    const seamX = centerX + (Math.random() - 0.5) * 20;
+    const angle = (Math.random() > 0.5 ? 0 : Math.PI) + (Math.random() - 0.5) * 1.2;
+    const speed = 3 + Math.random() * 8;
+
     particles.push({
-      x: centerX + (Math.random() - 0.5) * 160,
-      y: centerY + (Math.random() - 0.5) * 160,
+      x: seamX,
+      y: seamY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      size: 2 + Math.random() * 4,
-      color: Math.random() > 0.3 ? '#ff0033' : '#ffffff',
+      size: 2 + Math.random() * 5,
+      color: Math.random() > 0.25 ? '#ff0033' : '#ffffff',
       alpha: 1
     });
   }
@@ -223,46 +237,49 @@ const animateParticles = () => {
 };
 
 const startCinematicSequence = () => {
-  // STEP 1: QR Freeze (Already active at start)
+  // STEP 1: Intact QR.png at start
+  currentStep.value = 1;
+  currentQrImage.value = qrPng;
   cyberAudio.playClick();
 
-  // STEP 2: Digital Tear after 1.5s
+  // STEP 2: Transition from QR.png -> tornqr.png (Digital Tear) after 1.5s
   setTimeout(() => {
     currentStep.value = 2;
     isTearing.value = true;
+    currentQrImage.value = tornQrPng; // TRANSITION TO tornqr.png!
     cyberAudio.playDigitalTear();
     createDisintegrationParticles();
     animFrameId = requestAnimationFrame(animateParticles);
   }, 1500);
 
-  // STEP 3: Padlock Materialization after 3s
+  // STEP 3: Padlock Materialization after 3.2s
   setTimeout(() => {
     currentStep.value = 3;
     isTearing.value = false;
-  }, 3000);
+  }, 3200);
 
-  // STEP 4: Lock Unlock after 4.5s
+  // STEP 4: Lock Unlock after 4.7s
   setTimeout(() => {
     currentStep.value = 4;
     isUnlocked.value = true;
     cyberAudio.playLockUnlock();
-  }, 4500);
+  }, 4700);
 
-  // STEP 5: Shield Symbol after 6.0s
+  // STEP 5: Shield Symbol after 6.2s
   setTimeout(() => {
     currentStep.value = 5;
-  }, 6000);
+  }, 6200);
 
-  // STEP 6: Logo Reveal after 7.5s
+  // STEP 6: Logo Reveal after 7.7s
   setTimeout(() => {
     currentStep.value = 6;
-  }, 7500);
+  }, 7700);
 
-  // STEP 7: Official Message after 9.0s
+  // STEP 7: Official Message after 9.2s
   setTimeout(() => {
     currentStep.value = 7;
     cyberAudio.playInaugurationChime();
-  }, 9000);
+  }, 9200);
 };
 
 onMounted(() => {
